@@ -6,6 +6,8 @@ services:
     build:
       context: .
     restart: always
+    depends_on:
+      - elasticsearch
     ports:
       - 8000:8000
       - 9229:9229
