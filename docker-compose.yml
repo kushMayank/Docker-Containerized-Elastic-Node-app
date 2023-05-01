@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  notes:
+    container_name: node_server
+    build:
+      context: .
+    restart: always
+    ports:
+      - 8000:8000
+      - 9229:9229
+    environment:
+      - SERVER_PORT=8000
+      - CONNECTIONSTRING=mongodb://mongo:27017/notes
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run debug
+
+  mongo:
+    image: mongo:4.2.8
+    container_name: mongo_database_server
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+      - mongodb_config:/data/configdb
+
+  elasticsearch:
+    container_name: elasticsearch_container
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    logging:
+      driver: none
+    ports:
+      - 9200:9200
+
+  kibana:
+    container_name: kibana_container
+    depends_on:
+      - elasticsearch
+    restart: always
+    image: docker.elastic.co/kibana/kibana:8.7.0
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+
+volumes:
+  mongodb:
+  mongodb_config:
+  es_data:
+  kibana-data:
+
+
